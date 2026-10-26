@@ -1,0 +1,7 @@
+asgiref==3.13.0
+Django==5.2.18
+grpcio==1.70.0
+grpcio-tools==1.70.0
+protobuf==5.29.3
+setuptools==84.2.1
+sqlparse==0.6.0

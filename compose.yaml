@@ -1,0 +1,17 @@
+name: python-go-grpc-pr4
+services:
+  lab:
+    build: .
+    image: python-go-grpc-pr4:local
+    ports:
+      - "127.0.0.1:18000:8000"
+      - "127.0.0.1:18001:8001"
+    volumes:
+      - ./certs:/app/certs
+      - ./artifacts:/app/artifacts
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    stop_grace_period: 15s

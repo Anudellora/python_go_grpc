@@ -1,0 +1,35 @@
+name: gRPC lab checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Ubuntu lab and run unit tests
+        run: docker build -t grpc-lab:ci .
+      - name: Start services
+        run: docker run -d --name grpc-lab grpc-lab:ci
+      - name: Wait for Django
+        run: |
+          ready=0
+          for i in $(seq 1 60); do
+            if docker exec grpc-lab curl -fsS http://127.0.0.1:8000/health; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          test "$ready" = 1
+      - name: Verify gRPC, mTLS, nginx and two clients
+        run: docker exec grpc-lab python scripts/integration_test.py
+      - name: Show diagnostics
+        if: always()
+        run: |
+          docker logs grpc-lab || true
+          docker exec grpc-lab sh -c 'cat artifacts/*.log' || true
+      - name: Stop services
+        if: always()
+        run: docker rm -f grpc-lab || true
